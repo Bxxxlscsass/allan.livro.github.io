@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistemas de TI: Controle de Livraria (Local)</title>
+    <style>
+        /* CSS: Tema Claro Padrão Profissional */
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: #f4f6f9; 
+            color: #333333; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .grid { display: flex; gap: 24px; width: 850px; }
+        .card { 
+            background-color: #ffffff; 
+            padding: 24px; 
+            border-radius: 8px; 
+            flex: 1; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            border: 1px solid #e1e4e8;
+            display: flex;
+            flex-direction: column;
+        }
+        h2 { 
+            color: #0066cc; 
+            margin-top: 0; 
+            text-align: center; 
+            border-bottom: 2px solid #e1e4e8; 
+            padding-bottom: 8px; 
+            font-size: 20px;
+        }
+        label { font-size: 12px; color: #666666; display: block; margin-top: 8px; font-weight: 600; }
+        select, input, button { 
+            width: 100%; 
+            padding: 10px; 
+            margin: 4px 0 12px 0; 
+            border-radius: 4px; 
+            border: 1px solid #cccccc; 
+            box-sizing: border-box; 
+            background-color: #ffffff; 
+            color: #333333; 
+            font-size: 14px; 
+        }
+        select:focus, input:focus { border-color: #0066cc; outline: none; }
+        
+        /* Botões e Animação de Carregamento */
+        button { 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            background-color: #0066cc; 
+            color: #ffffff;
+            border: none;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            transition: background-color 0.2s; 
+        }
+        button:hover { 
+            background-color: #0052a3; 
+        }
+        button:disabled { 
+            background-color: #a3c2e0; 
+            cursor: not-allowed; 
+        }
+        .btn-venda { 
+            background-color: #0066cc; 
+        }
+        .btn-venda:hover { 
+            background-color: #0052a3;  
+        }
+        
+        /* NOVO: Botão de Exportar Relatório */
+        .btn-exportar { 
+            background-color: #28a745; 
+            margin-top: auto; 
+            margin-bottom: 0; 
+        }
+        .btn-exportar:hover { 
+            background-color: #218838; 
+        }
+        
+        /* Círculo de Carregamento (Spinner) */
+        .spinner { 
+            width: 16px; 
+            height: 16px; 
+            border: 3px solid rgba(255,255,255,0.3); 
+            border-radius: 50%; 
+            border-top-color: #ffffff; 
+            animation: spin 0.8s linear infinite; 
+            display: none; 
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Lista de Inventário */
+        .tabela-container { 
+            background-color: #fafbfc; 
+            height: 270px; 
+            overflow-y: auto; 
+            border-radius: 4px; 
+            padding: 5px; 
+            border: 1px solid #e1e4e8;
+            margin-bottom: 15px;
+        }
+        .linha-estoque { 
+            border-bottom: 1px solid #e1e4e8; 
+            padding: 10px 8px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .linha-estoque:last-child { 
+            border-bottom: none; 
+        }
+        
+        /* Badges de Alerta de Estoque */
+        .badge { 
+            background-color: #e6f7ed; 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            color: #1e7e34; 
+            border: 1px solid #c3e6cb; 
+        }
+        .badge-critico { 
+            background-color: #fff3cd; 
+            color: #856404; 
+            border: 1px solid #ffeeba; 
+        } /* Menos de 3 */
+        .badge-zero { 
+            background-color: #f8d7da; 
+            color: #721c24; 
+            border: 1px solid #f5c6cb; 
+        }    /* Esgotado */
+    </style>
+</head>
+<body>
+
+<div class="grid">
+    <!-- Coluna 1: Formulários de TI -->
+    <div class="card">
+        <h2>Entrada e Vendas</h2>
+        
+        <div style="border-bottom: 1px dashed #e1e4e8; margin-bottom: 10px;">
+            <label>Título do Livro:</label>
+            <input type="text" id="txtTitulo" placeholder="Nome do livro">
+            
+            <label>Categoria:</label>
+            <select id="selectTipo">
+                <option value="Nacional (Físico)">Nacional</option>
+                <option value="Importado EUA">Importado EUA</option>
+                <option value="E-book (Digital)">Digital E-book</option>
+            </select>
+
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label>Preço (R$):</label><input type="number" id="numPreco" step="0.01"></div>
+                <div style="flex:1;"><label>Quantidade:</label><input type="number" id="numQtd" value="1"></div>
+            </div>
+            
+            <button id="btnCadastro" onclick="comunicar('CADASTRO')">
+                <div class="spinner" id="spinCadastro"></div>
+                <span id="txtBtnCadastro">Entrada</span>
+            </button>
+        </div>
+
+        <label>Livro para Vender:</label>
+        <input type="text" id="txtVendaTitulo" placeholder="Nome do livro cadastrado">
+        <label>Quantidade de Saída:</label>
+        <input type="number" id="numVendaQtd" value="1">
+        
+        <button id="btnVenda" class="btn-venda" onclick="comunicar('VENDA')">
+            <div class="spinner" id="spinVenda"></div>
+            <span id="txtBtnVenda"> Confirmar Venda</span>
+        </button>
+    </div>
+
+    <!-- Coluna 2: Inventário e Relatório -->
+    <div class="card">
+        <h2> Inventário Atualizado</h2>
+        <div class="tabela-container" id="painelInventario">
+            <!-- Gerado via JavaScript -->
+        </div>
+        
+        <!-- NOVO: Chamada para a função de exportação de dados -->
+        <button class="btn-exportar" onclick="exportarRelatorioTxt()">
+             Exportar Relatório (.txt)
+        </button>
+    </div>
+</div>
+
+<script>
+    // Banco de dados simulado localmente
+    let inventarioLivros = [
+        { titulo: "Core Java", categoria: "Nacional (Físico)", precoBRL: 29.90, estoque: 10 },
+        { titulo: "Unix Network Programming", categoria: "Importado EUA", precoBRL: 238.95, estoque: 2 }, 
+        { titulo: "Java Avançado", categoria: "E-book (Digital)", precoBRL: 16.90, estoque: 0 }  
+    ];
+
+    window.addEventListener('DOMContentLoaded', () => renderizar());
+
+    const esperar = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function comunicar(operacao) {
+        let btn = operacao === 'CADASTRO' ? document.getElementById('btnCadastro') : document.getElementById('btnVenda');
+        let spin = operacao === 'CADASTRO' ? document.getElementById('spinCadastro') : document.getElementById('spinVenda');
+        let text = operacao === 'CADASTRO' ? document.getElementById('txtBtnCadastro') : document.getElementById('txtBtnVenda');
+        
+        btn.disabled = true;
+        spin.style.display = "block";
+        const textoOriginal = text.innerText;
+        text.innerText = operacao === 'CADASTRO' ? "Processando..." : "Vendendo...";
+
+        await esperar(800);
+
+        if (operacao === 'CADASTRO') {
+            const t = document.getElementById('txtTitulo').value.trim();
+            const tipo = document.getElementById('selectTipo').value;
+            let p = parseFloat(document.getElementById('numPreco').value);
+            const q = parseInt(document.getElementById('numQtd').value);
+
+            if(!t || isNaN(p) || q <= 0) {
+                finalizarLoading(btn, spin, text, textoOriginal);
+                return alert("Preencha todos os campos corretamente!");
+            }
+
+            if (tipo === "Importado EUA") p = p * 5.31; 
+            if (tipo === "E-book (Digital)") p = p * 0.85; 
+
+            let livroExistente = inventarioLivros.find(l => l.titulo.toLowerCase() === t.toLowerCase());
+            if (livroExistente) {
+                livroExistente.estoque += q;
+            } else {
+                inventarioLivros.push({ titulo: t, categoria: tipo, precoBRL: p, estoque: q });
+            }
+
+        } else if (operacao === 'VENDA') {
+            const t = document.getElementById('txtVendaTitulo').value.trim();
+            const q = parseInt(document.getElementById('numVendaQtd').value);
+
+            if(!t || q <= 0) {
+                finalizarLoading(btn, spin, text, textoOriginal);
+                return alert("Informe o título e a quantidade de venda!");
+            }
+
+            let livroExistente = inventarioLivros.find(l => l.titulo.toLowerCase() === t.toLowerCase());
+
+            if (!livroExistente || livroExistente.estoque < q) {
+                finalizarLoading(btn, spin, text, textoOriginal);
+                return alert("🚨 Erro de Fluxo: Estoque insuficiente ou livro não localizado!");
+            }
+
+            livroExistente.estoque -= q;
+            alert("🎉 Venda computada e baixa gerada no inventário!");
+        }
+
+        renderizar();
+        limparCampos();
+        finalizarLoading(btn, spin, text, textoOriginal);
+    }
+
+    function finalizarLoading(btn, spin, text, textoOriginal) {
+        btn.disabled = false;
+        spin.style.display = "none";
+        text.innerText = textoOriginal;
+    }
+
+    function renderizar() {
+        const html = inventarioLivros.map(l => {
+            let classeBadge = "badge";
+            let textoEstoque = `Qtd: ${l.estoque}`;
+
+            if (l.estoque === 0) {
+                classeBadge = "badge badge-zero";
+                textoEstoque = "ESGOTADO";
+            } else if (l.estoque < 3) {
+                classeBadge = "badge badge-critico";
+                textoEstoque = `CRÍTICO: ${l.estoque}`;
+            }
+
+            return `
+                <div class="linha-estoque">
+                    <div>
+                        <strong>${l.titulo}</strong><br>
+                        <span style="color:#777777; font-size:11px;">${l.categoria}</span>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="color:#1e7e34; font-weight:bold;">R$ ${l.precoBRL.toFixed(2)}</span><br>
+                        <span class="${classeBadge}">${textoEstoque}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        document.getElementById('painelInventario').innerHTML = html || 'Sem produtos cadastrados.';
+    }
+
+    // NOVA FUNÇÃO: Gera o download do arquivo de texto puro (TI)
+    function exportarRelatorioTxt() {
+        if(inventarioLivros.length === 0) return alert("Inventário vazio para exportação!");
+
+        let cabecalho = "=========================================\n";
+        cabecalho += "     RELATÓRIO DE CONTROLE DE ESTOQUE    \n";
+        cabecalho += "=========================================\n\n";
+        
+        let corpo = "";
+        inventarioLivros.forEach((l, index) => {
+            corpo += `${index + 1}. LIVRO: ${l.titulo}\n`;
+            corpo += `   CATEGORIA: ${l.categoria}\n`;
+            corpo += `   PREÇO FINAL: R$ ${l.precoBRL.toFixed(2)}\n`;
+            corpo += `   ESTOQUE ATUAL: ${l.estoque} unidades\n`;
+            corpo += `   STATUS: ${l.estoque === 0 ? 'ESGOTADO' : l.estoque < 3 ? 'CRÍTICO' : 'OK'}\n`;
+            corpo += "-----------------------------------------\n";
+        });
+
+        const textoCompleto = cabecalho + corpo;
+
+        // Blob: Cria uma estrutura de arquivo simulada em hardware/memória de TI
+        const blob = new Blob([textoCompleto], { type: 'text/plain;charset=utf-8' });
+        
+        // Cria um link virtual escondido no HTML para forçar o clique de download
+        const linkVirtual = document.createElement('a');
+        linkVirtual.download = 'relatorio_estoque_livros.txt';
+        linkVirtual.href = window.URL.createObjectURL(blob);
+        linkVirtual.style.display = 'none';
+        
+        document.body.appendChild(linkVirtual);
+        linkVirtual.click(); // Dispara o clique via código
+        document.body.removeChild(linkVirtual); // Remove o elemento temporário
+    }
+
+    function limparCampos() {
+        document.getElementById('txtTitulo').value = '';
+        document.getElementById('numPreco').value = '';
+        document.getElementById('txtVendaTitulo').value = '';
+    }
+</script>
+</body>
+</html>

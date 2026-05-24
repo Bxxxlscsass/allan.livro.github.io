@@ -1,0 +1,28 @@
+=========================================
+     RELATÓRIO DE CONTROLE DE ESTOQUE    
+=========================================
+
+1. LIVRO: Dom Casmurro
+   CATEGORIA: Nacional (Físico)
+   PREÇO FINAL: R$ 29.90
+   ESTOQUE ATUAL: 10 unidades
+   STATUS: OK
+-----------------------------------------
+2. LIVRO: Clean Code
+   CATEGORIA: Importado EUA
+   PREÇO FINAL: R$ 238.95
+   ESTOQUE ATUAL: 2 unidades
+   STATUS: CRÍTICO
+-----------------------------------------
+3. LIVRO: Java POO Avançado
+   CATEGORIA: E-book (Digital)
+   PREÇO FINAL: R$ 16.90
+   ESTOQUE ATUAL: 0 unidades
+   STATUS: ESGOTADO
+-----------------------------------------
+4. LIVRO: java
+   CATEGORIA: E-book (Digital)
+   PREÇO FINAL: R$ 17.00
+   ESTOQUE ATUAL: 0 unidades
+   STATUS: ESGOTADO
+-----------------------------------------
